@@ -1,6 +1,5 @@
 from Utils.config import ENV_CONFIG, AGENT_CONFIG
 from rl_agents.agents.common.factory import load_environment, load_agent
-import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
 
@@ -12,4 +11,3 @@ if __name__ == "__main__":
     agent = load_agent(AGENT_CONFIG, env)
     print("Agent loaded")
 
-    
