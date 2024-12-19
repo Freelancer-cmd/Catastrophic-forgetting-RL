@@ -15,8 +15,8 @@ import torch
 # -----------------------------------------
 
 LOG_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Logs")
-ENV_CONFIG = 'configs/HighwayEnv/env_obs_attention.json'  
-AGENT_CONFIG = 'configs/HighwayEnv/agents/DQNAgent/ego_attention2Head.json'
+ENV_CONFIG = 'rl-agents\scripts\configs\HighwayEnv\env_obs_attention.json'  
+AGENT_CONFIG = 'Utils/Architectures/attentionNN.json'
 
 # -----------------------------------------
 # Parameters 
