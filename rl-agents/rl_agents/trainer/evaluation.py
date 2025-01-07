@@ -7,7 +7,7 @@ from multiprocessing.pool import Pool
 from pathlib import Path
 import numpy as np
 from tensorboardX import SummaryWriter
-from gymnasium.wrappers import RecordVideo, RecordEpisodeStatistics, capped_cubic_video_schedule
+from gymnasium.wrappers import RecordVideo, RecordEpisodeStatistics
 
 import rl_agents.trainer.logger
 from rl_agents.agents.common.factory import load_environment, load_agent
@@ -91,7 +91,7 @@ class Evaluation(object):
         self.write_logging()
         self.write_metadata()
         self.filtered_agent_stats = 0
-        self.best_agent_stats = -np.infty, 0
+        self.best_agent_stats = -np.inf, 0 #Numpy 2.0 onward uses np.inf instead of np.infty
 
         self.recover = recover
         if self.recover:
@@ -332,10 +332,19 @@ class Evaluation(object):
         self.writer.add_histogram('episode/rewards', rewards, episode)
         logger.info("Episode {} score: {:.1f}".format(episode, sum(rewards)))
 
+    def capped_cubic_video_schedule(episode_id): #added the function missing from the gym wrapper
+        """
+        Return True for episodes following a capped cubic schedule.
+
+        :param episode_id: The current episode number.
+        :return: True if a video should be recorded, False otherwise.
+        """
+        return episode_id == 0 or (episode_id ** (1 / 3)).is_integer()
+
     def after_some_episodes(self, episode, rewards,
                             best_increase=1.1,
                             episodes_window=50):
-        if capped_cubic_video_schedule(episode):
+        if self.capped_cubic_video_schedule(episode):
             # Save the model
             if self.training:
                 self.save_agent_model(episode)

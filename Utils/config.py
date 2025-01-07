@@ -24,3 +24,4 @@ AGENT_CONFIG = 'Utils/Architectures/attentionNN.json'
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 #DEVICE = torch.device("cpu")
+
