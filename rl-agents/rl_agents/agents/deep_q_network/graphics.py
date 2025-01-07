@@ -51,7 +51,7 @@ class DQNGraphics(object):
         if sim_surface and hasattr(agent.value_net, "get_attention_matrix"):
             cls.display_vehicles_attention(agent, sim_surface)
 
-    @classmethod
+    '''@classmethod
     def display_vehicles_attention(cls, agent, sim_surface):
         import pygame
         try:
@@ -81,9 +81,46 @@ class DQNGraphics(object):
                                          max(sim_surface.pix(width), 1))
                 sim_surface.blit(attention_surface, (0, 0))
         except ValueError as e:
+            print("Unable to display vehicles attention", e)'''
+    ###### Alternative method for displaying vehicle attention ######
+    @classmethod
+    def display_vehicles_attention(cls, agent, sim_surface):
+        import pygame
+        try:
+            state = agent.previous_state
+            if (not hasattr(cls, "state")) or (cls.state != state).any():
+                cls.v_attention = cls.compute_vehicles_attention(agent, state)
+                cls.state = state
+
+            # Unwrap the environment to access the base environment with the vehicle attribute
+            env = agent.env
+            while hasattr(env, 'env'):
+                env = env.env
+
+            for head in range(list(cls.v_attention.values())[0].shape[0]):
+                attention_surface = pygame.Surface(sim_surface.get_size(), pygame.SRCALPHA)
+                for vehicle, attention in cls.v_attention.items():
+                    if attention[head] < cls.MIN_ATTENTION:
+                        continue
+                    width = attention[head] * 5
+                    desat = remap(attention[head], (0, 0.5), (0.7, 1), clip=True)
+                    colors = sns.color_palette("dark", desat=desat)
+                    color = np.array(colors[(2*head) % (len(colors) - 1)]) * 255
+                    color = (*color, remap(attention[head], (0, 0.5), (100, 200), clip=True))
+                    if vehicle is env.vehicle:  # Changed from agent.env.vehicle
+                        pygame.draw.circle(attention_surface, color,
+                                        sim_surface.vec2pix(env.vehicle.position),  # Changed from agent.env.vehicle.position
+                                        max(sim_surface.pix(width / 2), 1))
+                    else:
+                        pygame.draw.line(attention_surface, color,
+                                        sim_surface.vec2pix(env.vehicle.position),  # Changed from agent.env.vehicle.position
+                                        sim_surface.vec2pix(vehicle.position),
+                                        max(sim_surface.pix(width), 1))
+                sim_surface.blit(attention_surface, (0, 0))
+        except ValueError as e:
             print("Unable to display vehicles attention", e)
 
-    @classmethod
+    '''@classmethod
     def compute_vehicles_attention(cls, agent, state):
         import torch
         state_t = torch.tensor([state], dtype=torch.float).to(agent.device)
@@ -107,6 +144,39 @@ class DQNGraphics(object):
                 v_position += agent.env.unwrapped.vehicle.position
             vehicle = min(agent.env.road.vehicles, key=lambda v: np.linalg.norm(v.position - v_position))
             vehicle = agent.env.unwrapped.vehicle if v_index == 0 else vehicle
+            v_attention[vehicle] = attention[:, v_index]
+        return v_attention'''
+    ###### Alternative method for computing attention ######
+    @classmethod
+    def compute_vehicles_attention(cls, agent, state):
+        import torch
+        state_t = torch.tensor([state], dtype=torch.float).to(agent.device)
+        attention = agent.value_net.get_attention_matrix(state_t).squeeze(0).squeeze(1).detach().cpu().numpy()
+        ego, others, mask = agent.value_net.split_input(state_t)
+        mask = mask.squeeze()
+        v_attention = {}
+        
+        # Unwrap the environment to access the base environment with observation_type and road
+        env = agent.env
+        while hasattr(env, 'env'):
+            env = env.env
+        
+        obs_type = env.observation_type  # Changed from agent.env.observation_type
+        if hasattr(obs_type, "agents_observation_types"):  # Handle multi-agent observation
+            obs_type = obs_type.agents_observation_types[0]
+        for v_index in range(state.shape[0]):
+            if mask[v_index]:
+                continue
+            v_position = {}
+            for feature in ["x", "y"]:
+                v_feature = state[v_index, obs_type.features.index(feature)]
+                v_feature = remap(v_feature, [-1, 1], obs_type.features_range[feature])
+                v_position[feature] = v_feature
+            v_position = np.array([v_position["x"], v_position["y"]])
+            if not obs_type.absolute and v_index > 0:
+                v_position += env.unwrapped.vehicle.position  # Changed from agent.env.unwrapped.vehicle.position
+            vehicle = min(env.road.vehicles, key=lambda v: np.linalg.norm(v.position - v_position))  # Changed from agent.env.road.vehicles
+            vehicle = env.unwrapped.vehicle if v_index == 0 else vehicle  # Changed from agent.env.unwrapped.vehicle
             v_attention[vehicle] = attention[:, v_index]
         return v_attention
 

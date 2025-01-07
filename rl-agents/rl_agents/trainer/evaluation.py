@@ -332,6 +332,7 @@ class Evaluation(object):
         self.writer.add_histogram('episode/rewards', rewards, episode)
         logger.info("Episode {} score: {:.1f}".format(episode, sum(rewards)))
 
+    @staticmethod
     def capped_cubic_video_schedule(episode_id): #added the function missing from the gym wrapper
         """
         Return True for episodes following a capped cubic schedule.
@@ -341,6 +342,7 @@ class Evaluation(object):
         """
         return episode_id == 0 or (episode_id ** (1 / 3)).is_integer()
 
+    
     def after_some_episodes(self, episode, rewards,
                             best_increase=1.1,
                             episodes_window=50):
