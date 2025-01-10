@@ -18,7 +18,7 @@ if __name__ == "__main__":
     print("Device: ", DEVICE)
 
     print("Evaluating agent...")
-    evaluate(ENV_CONFIG, AGENT_CONFIG, {'--train': True, '--episodes': 50, '--recover': False, '--no-display': False, '--seed': 10, '--verbose': False, '--name-from-config': False, '--recover-from': False})
+    evaluate(ENV_CONFIG, AGENT_CONFIG, {'--train': True, '--episodes': 2, '--recover': False, '--no-display': True, '--seed': 10, '--verbose': False, '--name-from-config': False, '--recover-from': False})
     print("Agent evaluated")
 
     print("---------- End of main.py ----------")
