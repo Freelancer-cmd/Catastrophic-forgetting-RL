@@ -33,7 +33,7 @@ from rl_agents.agents.common.factory import load_agent, load_environment
 
 BENCHMARK_FILE = 'benchmark_summary'
 LOGGING_CONFIG = 'rl-agents\scripts\configs\logging.json' # Changeed this path
-VERBOSE_CONFIG = 'configs/verbose.json'
+VERBOSE_CONFIG = 'rl-agents\scripts\configs/verbose.json' # Changed this path
 
 
 def main():

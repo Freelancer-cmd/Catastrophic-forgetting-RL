@@ -1,0 +1,21 @@
+{
+    "base_config": "rl-agents/scripts/configs/HighwayEnv/agents/DQNAgent/ddqn.json",
+    "model": {
+        "type": "ConvolutionalNetwork",
+        "in_channels": 1,
+        "in_height": 15,
+        "in_width": 7,
+        "activation": "RELU",
+        "head_mlp": {
+            "type": "MultiLayerPerceptron",
+            "layers": [512, 256],
+            "reshape": true,
+            "activation": "RELU",
+            "out": 5
+        }
+    },
+    "gamma": 0.99,
+    "batch_size": 64,
+    "memory_capacity": 15000,
+    "target_update": 512
+}
