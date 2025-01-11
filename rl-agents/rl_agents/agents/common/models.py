@@ -154,6 +154,40 @@ class ConvolutionalNetwork(nn.Module, Configurable):
         return self.head(x)
 
 
+#This is where the LSTMNetwork class starts
+class LSTMNetwork(BaseModule, Configurable):
+    def __init__(self, config):
+        super().__init__()
+        Configurable.__init__(self, config)
+        self.config = config
+
+        # Define LSTM layer
+        self.lstm = nn.LSTM(input_size=self.config["input_size"],
+                            hidden_size=self.config["hidden_size"],
+                            num_layers=self.config["num_layers"],
+                            batch_first=True)
+
+        # Define output layer
+        self.output_layer = nn.Linear(self.config["hidden_size"], self.config["output_size"])
+
+
+    @classmethod
+    def default_config(cls):
+        return {
+            "input_size": 128,
+            "hidden_size": 128,
+            "num_layers": 2,
+            "output_size": 10,
+            "dropout": 0.2
+        }
+    
+    def forward(self, x):
+        # Forward pass through LSTM
+        lstm_out, _ = self.lstm(x)
+        # Pass the output of the last time step to the output layer
+        output = self.output_layer(lstm_out[:, -1, :])
+        return output
+
 class EgoAttention(BaseModule, Configurable):
     def __init__(self, config):
         super().__init__()
@@ -437,6 +471,8 @@ def model_factory(config: dict) -> nn.Module:
         return ConvolutionalNetwork(config)
     elif config["type"] == "EgoAttentionNetwork":
         return EgoAttentionNetwork(config)
+    elif config["type"] == "LSTMNetwork":
+        return LSTMNetwork(config)
     else:
         raise ValueError("Unknown model type")
 
