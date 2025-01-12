@@ -103,25 +103,33 @@ class DuelingNetwork(BaseModule, Configurable):
         advantage = self.advantage(x)
         return value + advantage - advantage.mean(1).unsqueeze(1).expand(-1,  self.config["out"])
 
-
 class ConvolutionalNetwork(nn.Module, Configurable):
     def __init__(self, config):
         super().__init__()
         Configurable.__init__(self, config)
         self.activation = activation_factory(self.config["activation"])
+        
+        # Convolutional Layers
         self.conv1 = nn.Conv2d(self.config["in_channels"], 16, kernel_size=2, stride=2)
         self.conv2 = nn.Conv2d(16, 32, kernel_size=2, stride=2)
         self.conv3 = nn.Conv2d(32, 64, kernel_size=2, stride=2)
+        
+        # Adding more layers
+        self.conv4 = nn.Conv2d(64, 128, kernel_size=2, stride=2)  # New layer
+        self.conv5 = nn.Conv2d(128, 256, kernel_size=2, stride=2)  # New layer
 
         # MLP Head
-        # Number of Linear input connections depends on output of conv2d layers
-        # and therefore the input image size, so compute it.
         def conv2d_size_out(size, kernel_size=2, stride=2):
-            return (size - (kernel_size - 1) - 1) // stride  + 1
-        convw = conv2d_size_out(conv2d_size_out(conv2d_size_out(self.config["in_width"])))
-        convh = conv2d_size_out(conv2d_size_out(conv2d_size_out(self.config["in_height"])))
+            return (size - (kernel_size - 1) - 1) // stride + 1
+
+        # Calculate the output size of the convolutional layers
+        convw = conv2d_size_out(conv2d_size_out(conv2d_size_out(conv2d_size_out(conv2d_size_out(self.config["in_width"])))))
+        convh = conv2d_size_out(conv2d_size_out(conv2d_size_out(conv2d_size_out(conv2d_size_out(self.config["in_height"])))))
+        
         assert convh > 0 and convw > 0
-        self.config["head_mlp"]["in"] = convw * convh * 64
+
+        # Now we update the input size for the MLP based on the new output size
+        self.config["head_mlp"]["in"] = convw * convh * 256  # 256 channels from the final convolutional layer
         self.config["head_mlp"]["out"] = self.config["out"]
         self.head = model_factory(self.config["head_mlp"])
 
@@ -145,12 +153,20 @@ class ConvolutionalNetwork(nn.Module, Configurable):
 
     def forward(self, x):
         """
-            Forward convolutional network
+        Forward convolutional network
         :param x: tensor of shape BCHW
         """
-        x = self.activation((self.conv1(x)))
-        x = self.activation((self.conv2(x)))
-        x = self.activation((self.conv3(x)))
+        x = self.activation(self.conv1(x))
+        x = self.activation(self.conv2(x))
+        x = self.activation(self.conv3(x))
+        
+        # Apply the new layers
+        x = self.activation(self.conv4(x))
+        x = self.activation(self.conv5(x))
+
+        # Flatten the tensor before passing it to the fully connected layer
+        x = x.view(x.size(0), -1)  # Flatten the tensor
+
         return self.head(x)
 
 
