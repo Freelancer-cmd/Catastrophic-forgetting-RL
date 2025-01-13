@@ -1,0 +1,62 @@
+{
+    "agent": {
+        "__class__": "<class 'rl_agents.agents.deep_q_network.pytorch.DQNAgent'>",
+        "batch_size": 64,
+        "device": "cuda:best",
+        "double": true,
+        "exploration": {
+            "final_temperature": 0.05,
+            "method": "EpsilonGreedy",
+            "tau": 6000,
+            "temperature": 1.0
+        },
+        "gamma": 0.99,
+        "loss_function": "l2",
+        "memory_capacity": 15000,
+        "model": {
+            "activation": "RELU",
+            "head_mlp": {
+                "activation": "RELU",
+                "in": null,
+                "layers": [
+                    1024,
+                    512,
+                    256
+                ],
+                "out": 5,
+                "reshape": true,
+                "type": "MultiLayerPerceptron"
+            },
+            "in_channels": 4,
+            "in_height": 128,
+            "in_width": 64,
+            "layers": [
+                256,
+                256
+            ],
+            "out": 5,
+            "type": "ConvolutionalNetwork"
+        },
+        "n_steps": 1,
+        "optimizer": {
+            "k": 5,
+            "lr": 0.0005,
+            "type": "ADAM",
+            "weight_decay": 0
+        },
+        "target_update": 512
+    },
+    "env": {
+        "__class__": "<class 'gymnasium.wrappers.common.OrderEnforcing'>",
+        "_action_space": "None",
+        "_cached_spec": "None",
+        "_disable_render_order_enforcing": "False",
+        "_has_reset": "True",
+        "_metadata": "None",
+        "_observation_space": "None",
+        "_saved_kwargs": "{'disable_render_order_enforcing': False}",
+        "env": "<PassiveEnvChecker<HighwayEnv<highway-v0>>>",
+        "id": "highway-v0",
+        "import_module": "highway_env"
+    }
+}
