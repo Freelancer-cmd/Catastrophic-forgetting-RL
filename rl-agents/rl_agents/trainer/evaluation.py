@@ -112,6 +112,8 @@ class Evaluation(object):
             self.reward_viewer = RewardViewer()
         self.observation = None
 
+        self.explain_dict = {}
+
     def train(self):
         self.training = True
         if getattr(self.agent, "batched", False):
@@ -143,10 +145,17 @@ class Evaluation(object):
             self.reset(seed=self.episode)
             rewards = []
             start_time = time.time()
+            rewards = []
+            state_log = []
+            action_log = []
             while not terminal:
                 # Step until a terminal step is reached
-                reward, terminal = self.step()
+                reward, terminal, previous_observation, action = self.step()
                 rewards.append(reward)
+                state_log.append(previous_observation)
+                action_log.append(action)
+
+                
 
                 # Catch interruptions
                 try:
@@ -159,6 +168,11 @@ class Evaluation(object):
             duration = time.time() - start_time
             self.after_all_episodes(self.episode, rewards, duration)
             self.after_some_episodes(self.episode, rewards)
+
+            if (self.training == False):
+                self.explain_dict['state'] = state_log
+                self.explain_dict['action'] = action_log
+                self.explain_dict['reward'] = rewards
 
     def step(self):
         """
@@ -191,7 +205,7 @@ class Evaluation(object):
         except NotImplementedError:
             pass
 
-        return reward, terminal
+        return reward, terminal, previous_observation, action
 
     def run_batched_episodes(self):
         """
