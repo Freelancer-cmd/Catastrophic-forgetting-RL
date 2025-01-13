@@ -3,7 +3,7 @@ import os
 import numpy as np
 from Utils.config import ENV_CONFIG, AGENT_CONFIG, DEVICE, LOG_PATH, TRAINING, MODEL_PATH, NUM_EP_TRAINING, NUM_EP_TEST,EPISODE_LEN
 
-from Utils.analysis import plot_scores_from_log
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'rl-agents')))
 from rl_agents.agents.common.factory import load_environment, load_agent
 from scripts.experiments import evaluate
