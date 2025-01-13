@@ -6,7 +6,7 @@ import torch
 # -----------------------------------------
 
 NUM_EP_TRAINING = 1500
-NUM_EP_TEST = 4
+NUM_EP_TEST = 150
 EPISODE_LEN = 80
 
 

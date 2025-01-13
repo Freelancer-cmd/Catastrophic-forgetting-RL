@@ -43,7 +43,7 @@ if __name__ == "__main__":
                 print('Num of frames:', num_of_frame)
                 num_failed_episodes = num_failed_episodes + 1
 
-            print("Succes rate:", num_failed_episodes/NUM_EP_TEST)
+        print("Succes rate:", num_failed_episodes/NUM_EP_TEST)
 
 
     #print("Plotting scores...")
