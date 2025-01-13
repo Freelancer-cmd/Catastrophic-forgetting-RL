@@ -30,8 +30,8 @@ if __name__ == "__main__":
     else:
         print("Evaluating the agent...")
         num_failed_episodes = 0
-        for ep in NUM_EP_TEST:
-            ev = Evaluation(env, agent, num_episodes = 1, training = False, recover = MODEL_PATH)
+        for ep in range(NUM_EP_TEST):
+            ev = Evaluation(env, agent, num_episodes = 1, training = False, recover = MODEL_PATH, display_env = False, display_agent = False, display_rewards = False)
             ev.test()
             states = ev.explain_dict['state']
             actions = ev.explain_dict['action']
@@ -43,7 +43,7 @@ if __name__ == "__main__":
                 print('Num of frames:', num_of_frame)
                 num_failed_episodes = num_failed_episodes + 1
 
-        print("Succes rate:", num_failed_episodes/NUM_EP_TEST)
+        print("Succes rate:", 1-num_failed_episodes/NUM_EP_TEST)
 
 
     #print("Plotting scores...")
